@@ -1,0 +1,54 @@
+services:
+  discord_database:
+    platform: linux/x86_64
+    image: mysql
+    container_name: discord_database
+    ports:
+      - "10009:3306"
+    volumes:
+      - ./:/app/
+    environment:
+      MYSQL_DATABASE: DiscordDB
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_ROOT_PASSWORD: user
+    networks:
+      - discord_net
+
+
+  rabbitmq:
+    image: masstransit/rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - discord_net
+
+  discord_api:
+    container_name: discord_api
+    build:
+      context: .
+      dockerfile: API/Dockerfile
+    ports:
+      - "10010:80"
+      - "10011:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      discord_database:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    volumes:
+      - ./:/app/app
+    links:
+      - discord_database
+      - rabbitmq
+    networks:
+      - discord_net
+
+networks:
+  discord_net:
+    name: discord_net

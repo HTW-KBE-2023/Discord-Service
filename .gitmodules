@@ -1,0 +1,3 @@
+[submodule "MessageQueueContracts"]
+	path = MessageQueueContracts
+	url = https://github.com/HTW-KBE-2023/MessageQueueContracts.git
